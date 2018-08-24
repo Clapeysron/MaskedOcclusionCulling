@@ -161,7 +161,7 @@ MAKE_ACCESSOR(simd_i32, __m512i, int, const, 16)
 
 typedef MaskedOcclusionCulling::VertexLayout VertexLayout;
 
-FORCE_INLINE void GatherVertices(__m512 *vtxX, __m512 *vtxY, __m512 *vtxW, const float *inVtx, const unsigned int *inTrisPtr, int numLanes, const VertexLayout &vtxLayout)
+FORCE_INLINE void GatherVertices(__m512 *vtxX, __m512 *vtxY, __m512 *vtxW, const float *inVtx, const int *inTrisPtr, int numLanes, const VertexLayout &vtxLayout)
 {
 	assert(numLanes >= 1);
 

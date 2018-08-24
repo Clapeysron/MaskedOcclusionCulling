@@ -430,7 +430,7 @@ void CullingThreadpool::ClearBuffer()
 	mMOC->ClearBuffer();
 }
 
-void CullingThreadpool::RenderTriangles(const float *inVtx, const unsigned int *inTris, int nTris, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
+void CullingThreadpool::RenderTriangles(const float *inVtx, const int *inTris, int nTris, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
 #if MOC_RECORDER_ENABLE != 0
     mMOC->RecordRenderTriangles( inVtx, inTris, nTris, mCurrentMatrix, clipPlaneMask, bfWinding, *mVertexLayouts.GetData( ) );
@@ -455,12 +455,12 @@ void CullingThreadpool::RenderTriangles(const float *inVtx, const unsigned int *
 	}
 }
 
-CullingThreadpool::CullingResult CullingThreadpool::TestRect(float xmin, float ymin, float xmax, float ymax, float wmin)
+CullingThreadpool::CullingResult CullingThreadpool::TestRect(float xmin, float ymin, float xmax, float ymax, float wmin, float wmax)
 {
-	return mMOC->TestRect(xmin, ymin, xmax, ymax, wmin);
+	return mMOC->TestRect(xmin, ymin, xmax, ymax, wmin, wmax);
 }
 
-CullingThreadpool::CullingResult CullingThreadpool::TestTriangles(const float *inVtx, const unsigned int *inTris, int nTris, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
+CullingThreadpool::CullingResult CullingThreadpool::TestTriangles(const float *inVtx, const int *inTris, int nTris, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
 	return mMOC->TestTriangles(inVtx, inTris, nTris, mCurrentMatrix, bfWinding, clipPlaneMask, *mVertexLayouts.GetData());
 }

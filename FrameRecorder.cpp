@@ -316,9 +316,9 @@ static bool ReadTriangleRecording( FrameRecording::TrianglesEntry & outEntry, In
         return false;
     }
 
-    if( ( outEntry.mHasModelToClipMatrix = ( hasMatrix != 0 ) ) )
+    if( ( outEntry.mHasmodelToClipMatrix = ( hasMatrix != 0 ) ) )
     {
-        if( inStream.Read( (char*)outEntry.mModelToClipMatrix, 16 * sizeof( float ) ) != 16 * sizeof( float ) )
+        if( inStream.Read( (char*)outEntry.mmodelToClipMatrix, 16 * sizeof( float ) ) != 16 * sizeof( float ) )
         {
             assert( false );
             return false;
@@ -326,7 +326,7 @@ static bool ReadTriangleRecording( FrameRecording::TrianglesEntry & outEntry, In
     }
     else
     {
-        memset( outEntry.mModelToClipMatrix, 0, 16 * sizeof( float ) );
+        memset( outEntry.mmodelToClipMatrix, 0, 16 * sizeof( float ) );
     }
 
     if( inStream.Read( (char*)&outEntry.mClipPlaneMask, sizeof( outEntry.mClipPlaneMask ) ) != sizeof( outEntry.mClipPlaneMask ) )

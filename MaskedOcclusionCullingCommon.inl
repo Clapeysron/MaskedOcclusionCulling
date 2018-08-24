@@ -88,7 +88,7 @@ template<typename T> FORCE_INLINE T min(const T &a, const T &b) { return a < b ?
 // Vertex fetch utility function, need to be in global namespace due to template specialization
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<int N> FORCE_INLINE void VtxFetch4(__mw *v, const unsigned int *inTrisPtr, int triVtx, const float *inVtx, int numLanes)
+template<int N> FORCE_INLINE void VtxFetch4(__mw *v, const int *inTrisPtr, int triVtx, const float *inVtx, int numLanes)
 {
 	// Fetch 4 vectors (matching 1 sse part of the SIMD register), and continue to the next
 	const int ssePart = (SIMD_LANES / 4) - N;
@@ -101,7 +101,7 @@ template<int N> FORCE_INLINE void VtxFetch4(__mw *v, const unsigned int *inTrisP
 	VtxFetch4<N - 1>(v, inTrisPtr, triVtx, inVtx, numLanes);
 }
 
-template<> FORCE_INLINE void VtxFetch4<0>(__mw *v, const unsigned int *inTrisPtr, int triVtx, const float *inVtx, int numLanes) 
+template<> FORCE_INLINE void VtxFetch4<0>(__mw *v, const int *inTrisPtr, int triVtx, const float *inVtx, int numLanes) 
 {
 	// Workaround for unused parameter warning
 	(void)v; (void)inTrisPtr; (void)triVtx; (void)inVtx; (void)numLanes;
@@ -634,7 +634,7 @@ public:
 	// Common SSE/AVX input assembly functions, note that there are specialized gathers for the general case in the SSE/AVX specific files
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FORCE_INLINE void GatherVerticesFast(__mw *vtxX, __mw *vtxY, __mw *vtxW, const float *inVtx, const unsigned int *inTrisPtr, int numLanes)
+	FORCE_INLINE void GatherVerticesFast(__mw *vtxX, __mw *vtxY, __mw *vtxW, const float *inVtx, const int *inTrisPtr, int numLanes)
 	{
 		// This function assumes that the vertex layout is four packed x, y, z, w-values.
 		// Since the layout is known we can get some additional performance by using a 
@@ -1502,7 +1502,7 @@ public:
 	}
 
 	template<int TEST_Z, int FAST_GATHER>
-	FORCE_INLINE CullingResult RenderTriangles(const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout)
+	FORCE_INLINE CullingResult RenderTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout)
 	{
 		assert(mMaskedHiZBuffer != nullptr);
 
@@ -1521,7 +1521,7 @@ public:
 		__m128 clipTriBuffer[MAX_CLIPPED * 3];
 		int cullResult = CullingResult::VIEW_CULLED;
 
-		const unsigned int *inTrisPtr = inTris;
+		const int *inTrisPtr = inTris;
 		int numLanes = SIMD_LANES;
 		int triIndex = 0;
 		while (triIndex < nTris || clipHead != clipTail)
@@ -1588,7 +1588,7 @@ public:
 		return (CullingResult)cullResult;
 	}
 
-	CullingResult RenderTriangles(const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
+	CullingResult RenderTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
 	{
         CullingResult retVal;
 
@@ -1607,7 +1607,7 @@ public:
 	// Occlusion query functions
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	CullingResult TestTriangles(const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
+	CullingResult TestTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
 	{
         CullingResult retVal;
 
@@ -1625,9 +1625,13 @@ public:
         return retVal;
 	}
     
-    CullingResult TestRect( float xmin, float ymin, float xmax, float ymax, float wmin ) const override
+    CullingResult TestRect( float xmin, float ymin, float xmax, float ymax, float wmin, float wmax) const override
 	{
 		STATS_ADD(mStats.mOccludees.mNumProcessedRectangles, 1);
+		if (xmin>1 || ymin>1 || xmax<-1 || ymax<-1 || wmax<0)
+		{
+			return CullingResult::VIEW_CULLED;
+		}
 		assert(mMaskedHiZBuffer != nullptr);
 
 		static const __m128i SIMD_TILE_PAD = _mm_setr_epi32(0, TILE_WIDTH, 0, TILE_HEIGHT);
@@ -1745,7 +1749,7 @@ public:
 	}
 
 	template<bool FAST_GATHER>
-	FORCE_INLINE void BinTriangles(const float *inVtx, const unsigned int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout)
+	FORCE_INLINE void BinTriangles(const float *inVtx, const int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout)
 	{
 		assert(mMaskedHiZBuffer != nullptr);
 
@@ -1760,7 +1764,7 @@ public:
 		int clipTail = 0;
 		__m128 clipTriBuffer[MAX_CLIPPED * 3];
 
-		const unsigned int *inTrisPtr = inTris;
+		const int *inTrisPtr = inTris;
 		int numLanes = SIMD_LANES;
 		int triIndex = 0;
 		while (triIndex < nTris || clipHead != clipTail)
@@ -1853,7 +1857,7 @@ public:
 #endif
 	}
 
-	void BinTriangles(const float *inVtx, const unsigned int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
+	void BinTriangles(const float *inVtx, const int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask, const VertexLayout &vtxLayout) override
 	{
 		if (vtxLayout.mStride == 16 && vtxLayout.mOffsetY == 4 && vtxLayout.mOffsetW == 12)
 			BinTriangles<true>(inVtx, inTris, nTris, triLists, nBinsW, nBinsH, modelToClipMatrix, bfWinding, clipPlaneMask, vtxLayout);
@@ -1862,7 +1866,7 @@ public:
 	}
 
     template<int FAST_GATHER>
-    void GatherTransformClip( int & clipHead, int & clipTail, int & numLanes, int nTris, int & triIndex, __mw * vtxX, __mw * vtxY, __mw * vtxW, const float * inVtx, const unsigned int * &inTrisPtr, const VertexLayout & vtxLayout, const float * modelToClipMatrix, __m128 * clipTriBuffer, unsigned int &triMask, ClipPlanes clipPlaneMask )
+    void GatherTransformClip( int & clipHead, int & clipTail, int & numLanes, int nTris, int & triIndex, __mw * vtxX, __mw * vtxY, __mw * vtxW, const float * inVtx, const int * &inTrisPtr, const VertexLayout & vtxLayout, const float * modelToClipMatrix, __m128 * clipTriBuffer, unsigned int &triMask, ClipPlanes clipPlaneMask )
     {
         //////////////////////////////////////////////////////////////////////////////
         // Assemble triangles from the index list 

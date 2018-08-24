@@ -115,26 +115,26 @@ int main(int argc, char* argv[])
 	struct ClipspaceVertex { float x, y, z, w; };
 
 	// A triangle that intersects the view frustum
-	ClipspaceVertex triVerts[] = { { 5, 0, 0, 10 }, { 30, 0, 0, 20 }, { 10, 50, 0, 40 } };
-	unsigned int triIndices[] = { 0, 1, 2 };
+	ClipspaceVertex triVerts[] = { { 0, 0, 0, 3 }, { 0, 5, 6, 5 }, { 0, 5, 0, 5 } };
+	int triIndices[] = { 0, 1, 2 };
 
 	// Render the triangle
-	moc->RenderTriangles((float*)triVerts, triIndices, 1);
+	//moc->RenderTriangles((float*)triVerts, triIndices, 1);
 
 	// A clockwise winded (backfacing) triangle
 	ClipspaceVertex cwTriVerts[] = { { 7, -7, 0, 20 },{ 7.5, -7, 0, 20 },{ 7, -7.5, 0, 20 } };
 	unsigned int cwTriIndices[] = { 0, 1, 2 };
 
 	// Render with counter-clockwise backface culling, the triangle is rendered
-	moc->RenderTriangles((float*)cwTriVerts, cwTriIndices, 1, nullptr, MaskedOcclusionCulling::BACKFACE_CCW);
+	//moc->RenderTriangles((float*)cwTriVerts, cwTriIndices, 1, nullptr, MaskedOcclusionCulling::BACKFACE_CCW);
 
 	// A quad completely within the view frustum
-	ClipspaceVertex quadVerts[] = { { -150, -150, 0, 200 }, { -10, -65, 0, 75 }, { 0, 0, 0, 20 }, { -40, 10, 0, 50 } };
-	unsigned int quadIndices[] = { 0, 1, 2, 0, 2, 3 };
+	ClipspaceVertex quadVerts[] = { { 50, 50, 0, 200 }, { 0, 0, 0, 200 }, { 50, -50, 0, 150 } };
+	int quadIndices[] = { 0, 1, 2 };
 
 	// Render the quad. As an optimization, indicate that clipping is not required as it is 
 	// completely inside the view frustum
-	moc->RenderTriangles((float*)quadVerts, quadIndices, 2, nullptr, MaskedOcclusionCulling::BACKFACE_CW, MaskedOcclusionCulling::CLIP_PLANE_NONE);
+	moc->RenderTriangles((float*)quadVerts, quadIndices, 1, nullptr, MaskedOcclusionCulling::BACKFACE_CW, MaskedOcclusionCulling::CLIP_PLANE_NONE);
 
 	// A triangle specified on struct of arrays (SoA) form
 	float SoAVerts[] = {
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 	MaskedOcclusionCulling::VertexLayout SoAVertexLayout(sizeof(float), 3 * sizeof(float), 6 * sizeof(float));
 
 	// Render triangle with SoA layout
-	moc->RenderTriangles((float*)SoAVerts, triIndices, 1, nullptr, MaskedOcclusionCulling::BACKFACE_CW, MaskedOcclusionCulling::CLIP_PLANE_ALL, SoAVertexLayout);
+	//moc->RenderTriangles((float*)SoAVerts, triIndices, 1, nullptr, MaskedOcclusionCulling::BACKFACE_CW, MaskedOcclusionCulling::CLIP_PLANE_ALL, SoAVertexLayout);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
 	// A triangle, partly overlapped by the quad
 	ClipspaceVertex oqTriVerts[] = { { 0, 50, 0, 200 }, { -60, -60, 0, 200 }, { 20, -40, 0, 200 } };
-	unsigned int oqTriIndices[] = { 0, 1, 2 };
+	int oqTriIndices[] = { 0, 1, 2 };
 
 	// Perform an occlusion query. The triangle is visible and the query should return VISIBLE
 	MaskedOcclusionCulling::CullingResult result;
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 		printf("Tested triangle is outside view frustum\n");
 
 	// Render the occlusion query triangle to show its position
-	moc->RenderTriangles((float*)oqTriVerts, oqTriIndices, 1);
+	//moc->RenderTriangles((float*)oqTriVerts, oqTriIndices, 1);
 
 
 	// Perform an occlusion query testing if a rectangle is visible. The rectangle is completely 

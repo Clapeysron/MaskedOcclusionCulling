@@ -69,7 +69,7 @@ protected:
 		struct BinningJob
 		{
 			const float*        mVerts;
-			const unsigned int* mTris;
+			const int* mTris;
 			unsigned int        nTris;
 
 			const float*        mMatrix;
@@ -275,7 +275,7 @@ public:
 	 * is finished, or make sure to rotate between more buffers than the maximum number of outstanding
 	 * render jobs (see the CullingThreadpool() constructor).
 	 */
-	void RenderTriangles(const float *inVtx, const unsigned int *inTris, int nTris, BackfaceWinding bfWinding = MaskedOcclusionCulling::BACKFACE_CW, ClipPlanes clipPlaneMask = MaskedOcclusionCulling::CLIP_PLANE_ALL);
+	void RenderTriangles(const float *inVtx, const int *inTris, int nTris, BackfaceWinding bfWinding = MaskedOcclusionCulling::BACKFACE_CW, ClipPlanes clipPlaneMask = MaskedOcclusionCulling::CLIP_PLANE_ALL);
 
 	/*
 	 * \brief Occlusion query for a rectangle with a given depth, see MaskedOcclusionCulling::TestRect().
@@ -290,7 +290,7 @@ public:
 	 * use "asynchronous" queries during traversal, and removing false positives later, when rendering 
 	 * has completed.
 	 */
-	CullingResult TestRect(float xmin, float ymin, float xmax, float ymax, float wmin);
+	CullingResult TestRect(float xmin, float ymin, float xmax, float ymax, float wmin, float wmax);
 
 	/*
 	 * \brief Occlusion query for a mesh, see MaskedOcclusionCulling::TestTriangles().
@@ -298,7 +298,7 @@ public:
 	 * <B>Important:</B> See the TestRect() method for a brief discussion about asynchronous occlusion 
 	 * queries.
 	 */
-	CullingResult TestTriangles(const float *inVtx, const unsigned int *inTris, int nTris, BackfaceWinding bfWinding = MaskedOcclusionCulling::BACKFACE_CW, ClipPlanes clipPlaneMask = MaskedOcclusionCulling::CLIP_PLANE_ALL);
+	CullingResult TestTriangles(const float *inVtx, const int *inTris, int nTris, BackfaceWinding bfWinding = MaskedOcclusionCulling::BACKFACE_CW, ClipPlanes clipPlaneMask = MaskedOcclusionCulling::CLIP_PLANE_ALL);
 
 	/*!
 	 * \brief Creates a per-pixel depth buffer from the hierarchical z buffer representation, see

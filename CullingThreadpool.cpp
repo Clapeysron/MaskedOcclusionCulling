@@ -277,7 +277,7 @@ void CullingThreadpool::ThreadMain(unsigned int threadIdx)
 					RenderJobQueue::BinningJob &sjob = job->mBinningJob;
 					for (unsigned int i = 0; i < mNumBins; ++i)
 						job->mRenderJobs[i].mTriIdx = 0;
-					mMOC->BinTriangles(sjob.mVerts, sjob.mTris, sjob.nTris, job->mRenderJobs, mBinsW, mBinsH, sjob.mMatrix, sjob.mMatrix, sjob.mBfWinding, sjob.mClipPlanes, *sjob.mVtxLayout);
+					mMOC->BinTriangles(sjob.mVerts, sjob.mTris, sjob.nTris, job->mRenderJobs, mBinsW, mBinsH, sjob.mMatrix, sjob.mBfWinding, sjob.mClipPlanes, *sjob.mVtxLayout);
 					mRenderQueue->FinishedBinningJob(job);
 				}
 				continue;
@@ -462,7 +462,7 @@ CullingThreadpool::CullingResult CullingThreadpool::TestRect(float xmin, float y
 
 CullingThreadpool::CullingResult CullingThreadpool::TestTriangles(const float *inVtx, const int *inTris, int nTris, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
-	return mMOC->TestTriangles(inVtx, inTris, nTris, mCurrentMatrix, mCurrentMatrix, bfWinding, clipPlaneMask, *mVertexLayouts.GetData());
+	return mMOC->TestTriangles(inVtx, inTris, nTris, mCurrentMatrix, bfWinding, clipPlaneMask, *mVertexLayouts.GetData());
 }
 
 void CullingThreadpool::ComputePixelDepthBuffer(float *depthData, bool flipY)

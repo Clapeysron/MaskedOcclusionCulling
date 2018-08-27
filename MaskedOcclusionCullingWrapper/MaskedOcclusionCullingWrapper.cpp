@@ -25,14 +25,14 @@ void mocSetNearClipPlane(void* moc, float nearDist)
 	((MaskedOcclusionCulling*)moc)->SetNearClipPlane(nearDist);
 }
 
-CullingResult mocRenderTriangles(void* moc, float *inVtx, int *inTris, int nTris, float *modelToClipMatrix, float *PVMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
+CullingResult mocRenderTriangles(void* moc, float *inVtx, int *inTris, int nTris, float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
-	return ((MaskedOcclusionCulling*)moc)->RenderTriangles(inVtx, inTris, nTris, modelToClipMatrix, PVMatrix, bfWinding, clipPlaneMask);
+	return ((MaskedOcclusionCulling*)moc)->RenderTriangles(inVtx, inTris, nTris, modelToClipMatrix, bfWinding, clipPlaneMask);
 }
 
-CullingResult mocTestTriangles(void* moc, float *inVtx, int *inTris, int nTris, float *modelToClipMatrix, float *PVMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
+CullingResult mocTestTriangles(void* moc, float *inVtx, int *inTris, int nTris, float *modelToClipMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
-	return ((MaskedOcclusionCulling*)moc)->TestTriangles(inVtx, inTris, nTris, modelToClipMatrix, PVMatrix, bfWinding, clipPlaneMask);
+	return ((MaskedOcclusionCulling*)moc)->TestTriangles(inVtx, inTris, nTris, modelToClipMatrix, bfWinding, clipPlaneMask);
 }
 
 CullingResult mocTestRect(void* moc, float xmin, float ymin, float xmax, float ymax, float wmin, float wmax)
@@ -79,7 +79,7 @@ void mocRenderObjects(void* moc, objectRenderData* data, int nObject, int* resul
 	}
 }
 
-void mocTestObjects(void* moc, objectRenderData* data, int nObject, int* resultList, float* PVMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
+void mocTestObjects(void* moc, objectRenderData* data, int nObject, int* resultList, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask)
 {
 	float MVPMatrix[16];
 	for (int i = 0; i < nObject; i++) 

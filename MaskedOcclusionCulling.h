@@ -361,7 +361,7 @@ public:
 	 * \return Will return VIEW_CULLED if all triangles are either outside the frustum or
 	 *         backface culled, returns VISIBLE otherwise.
 	 */
-	virtual CullingResult RenderTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
+	virtual CullingResult RenderTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, const float *PVMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
 
 	/*!
 	 * \brief Occlusion query for a rectangle with a given depth. The rectangle is given 
@@ -416,7 +416,7 @@ public:
 	 *         if the mesh is occluded by a previously rendered object, or VIEW_CULLED if all
 	 *         triangles are entirely outside the view frustum or backface culled.
 	 */
-	virtual CullingResult TestTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
+	virtual CullingResult TestTriangles(const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, const float *PVMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
 
 	/*!
 	 * \brief Perform input assembly, clipping , projection, triangle setup, and write
@@ -453,7 +453,7 @@ public:
 	 *        and will not be binned / rasterized. You may use BACKFACE_NONE to disable culling
 	 *        for double sided geometry
 	 */
-	virtual void BinTriangles(const float *inVtx, const int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
+	virtual void BinTriangles(const float *inVtx, const int *inTris, int nTris, TriList *triLists, unsigned int nBinsW, unsigned int nBinsH, const float *modelToClipMatrix = nullptr, const float *PVMatrix = nullptr, BackfaceWinding bfWinding = BACKFACE_CW, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, const VertexLayout &vtxLayout = VertexLayout(16, 4, 12)) = 0;
 
 	/*!
 	 * \brief Renders all occluder triangles in a trilist. This function can be used in
@@ -574,7 +574,7 @@ public:
     // 
     // merge the binned data back into original layout; in this case, call it manually from your Threadpool implementation (already added to CullingThreadpool).
     // If recording is not enabled, calling this function will do nothing.
-    void RecordRenderTriangles( const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, BackfaceWinding bfWinding = BACKFACE_CW, const VertexLayout &vtxLayout = VertexLayout( 16, 4, 12 ), CullingResult cullingResult = (CullingResult)-1 );
+    void RecordRenderTriangles( const float *inVtx, const int *inTris, int nTris, const float *modelToClipMatrix = nullptr, const float *PVMatrix, ClipPlanes clipPlaneMask = CLIP_PLANE_ALL, BackfaceWinding bfWinding = BACKFACE_CW, const VertexLayout &vtxLayout = VertexLayout( 16, 4, 12 ), CullingResult cullingResult = (CullingResult)-1 );
 #endif // #if MOC_RECORDER_ENABLE
 
 protected:

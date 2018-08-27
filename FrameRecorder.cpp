@@ -59,11 +59,11 @@ void MaskedOcclusionCulling::RecorderStop( ) const
     mRecorder = nullptr;
 }
 
-void MaskedOcclusionCulling::RecordRenderTriangles( const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, ClipPlanes clipPlaneMask, BackfaceWinding bfWinding, const VertexLayout &vtxLayout, CullingResult cullingResult )
+void MaskedOcclusionCulling::RecordRenderTriangles( const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, const float *PVMatrix, ClipPlanes clipPlaneMask, BackfaceWinding bfWinding, const VertexLayout &vtxLayout, CullingResult cullingResult )
 {
     std::lock_guard<std::mutex> lock( mRecorderMutex );
     if( mRecorder != nullptr ) 
-        mRecorder->RecordRenderTriangles( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, clipPlaneMask, bfWinding, vtxLayout );
+        mRecorder->RecordRenderTriangles( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, PVMatrix, clipPlaneMask, bfWinding, vtxLayout );
 }
 
 
@@ -122,7 +122,7 @@ void FrameRecorder::Write( const void * buffer, size_t size )
 #endif
 }
 
-void FrameRecorder::WriteTriangleRecording( MaskedOcclusionCulling::CullingResult cullingResult, const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, MaskedOcclusionCulling::ClipPlanes clipPlaneMask, MaskedOcclusionCulling::BackfaceWinding bfWinding, const MaskedOcclusionCulling::VertexLayout & vtxLayout )
+void FrameRecorder::WriteTriangleRecording( MaskedOcclusionCulling::CullingResult cullingResult, const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, const float *PVMatrix, MaskedOcclusionCulling::ClipPlanes clipPlaneMask, MaskedOcclusionCulling::BackfaceWinding bfWinding, const MaskedOcclusionCulling::VertexLayout & vtxLayout )
 {
     // write culling result
     Write( &cullingResult, sizeof( cullingResult ) );
@@ -167,10 +167,13 @@ void FrameRecorder::WriteTriangleRecording( MaskedOcclusionCulling::CullingResul
     }
 
     // write model to clip matrix (if any)
-    char hasMatrix = ( modelToClipMatrix != nullptr ) ? ( 1 ) : ( 0 );
+    char hasMatrix = ( modelToClipMatrix != nullptr && PVMatrix != nullptr ) ? ( 1 ) : ( 0 );
     Write( &hasMatrix, sizeof( hasMatrix ) );
-    if( hasMatrix )
-        Write( modelToClipMatrix, 16 * sizeof( float ) );
+	if (hasMatrix)
+	{
+		Write(modelToClipMatrix, 16 * sizeof(float));
+		Write(PVMartix, 16 * sizeof(float));
+	}
 
     Write( &clipPlaneMask, sizeof( clipPlaneMask ) );
 
@@ -216,11 +219,11 @@ void FrameRecorder::RecordClearBuffer( )
     Write( &header, 1 );
 }
 
-void FrameRecorder::RecordRenderTriangles( MaskedOcclusionCulling::CullingResult cullingResult, const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, MaskedOcclusionCulling::ClipPlanes clipPlaneMask, MaskedOcclusionCulling::BackfaceWinding bfWinding, const MaskedOcclusionCulling::VertexLayout & vtxLayout )
+void FrameRecorder::RecordRenderTriangles( MaskedOcclusionCulling::CullingResult cullingResult, const float *inVtx, const unsigned int *inTris, int nTris, const float *modelToClipMatrix, const float *PVMatrix, MaskedOcclusionCulling::ClipPlanes clipPlaneMask, MaskedOcclusionCulling::BackfaceWinding bfWinding, const MaskedOcclusionCulling::VertexLayout & vtxLayout )
 {
     char header = 0;
     Write( &header, 1 );
-    WriteTriangleRecording( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, clipPlaneMask, bfWinding, vtxLayout );
+    WriteTriangleRecording( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, PVMatrix, clipPlaneMask, bfWinding, vtxLayout );
 }
 
 void FrameRecorder::RecordTestRect( MaskedOcclusionCulling::CullingResult cullingResult, float xmin, float ymin, float xmax, float ymax, float wmin )
@@ -240,7 +243,7 @@ void FrameRecorder::RecordTestTriangles( MaskedOcclusionCulling::CullingResult c
 {
     char header = 2;
     Write( &header, 1 );
-    WriteTriangleRecording( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, clipPlaneMask, bfWinding, vtxLayout );
+    WriteTriangleRecording( cullingResult, inVtx, inTris, nTris, modelToClipMatrix, PVMatrix, clipPlaneMask, bfWinding, vtxLayout );
 }
 
 

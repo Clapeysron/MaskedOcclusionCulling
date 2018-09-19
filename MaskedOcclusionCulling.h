@@ -162,7 +162,8 @@ public:
 	{
 		VISIBLE     = 0x0,
 		OCCLUDED    = 0x1,
-		VIEW_CULLED = 0x3
+		VIEW_CULLED = 0x3,
+		FRUSTUM_CULLED = 0x4
 	};
 
 	enum ClipPlanes
@@ -238,19 +239,29 @@ public:
 	{
 		struct
 		{
+			long long mNumInputTriangles;
 			long long mNumProcessedTriangles;  //!< Number of occluder triangles processed in total
 			long long mNumRasterizedTriangles; //!< Number of occluder triangles passing view frustum and backface culling
 			long long mNumTilesTraversed;      //!< Number of tiles traversed by the rasterizer
 			long long mNumTilesUpdated;        //!< Number of tiles where the hierarchical z buffer was updated
 			long long mNumTilesMerged;        //!< Number of tiles where the hierarchical z buffer was updated
+			long long rasterize_full_time;
+			long long test_frustum_cull_time;
+			long long rasterize_time;
 		} mOccluders;
 
 		struct
 		{
+			long long mNumInputRectangles;
 			long long mNumProcessedRectangles; //!< Number of rects processed (TestRect())
 			long long mNumProcessedTriangles;  //!< Number of ocludee triangles processed (TestTriangles())
 			long long mNumRasterizedTriangles; //!< Number of ocludee triangle passing view frustum and backface culling
 			long long mNumTilesTraversed;      //!< Number of tiles traversed by triangle & rect rasterizers
+			long long test_full_time;
+			long long test_frustum_cull_time;
+			long long transform_time;
+			long long boundingbox_time;
+			long long test_time;
 		} mOccludees;
 	};
 
@@ -410,7 +421,8 @@ public:
 	 *        intersect a certain frustum plane. However, setting an incorrect mask may
 	 *        cause out of bounds memory accesses.
 	 * \param vtxLayout A struct specifying the vertex layout (see struct for detailed 
-	 *        description). For best performance, it is advisable to store position data
+	 *        description). For best performance, it is advisable to store position 
+
 	 *        as compactly in memory as possible.
 	 * \return The query will return VISIBLE if the triangle mesh may be visible, OCCLUDED
 	 *         if the mesh is occluded by a previously rendered object, or VIEW_CULLED if all
@@ -492,6 +504,13 @@ public:
 	 */
 	virtual OcclusionCullingStatistics GetStatistics() = 0;
 
+	virtual void AddOccluderCount(int nTris) = 0;
+
+	virtual void AddOccludeeCount(int nRect) = 0;
+
+	virtual void SetOccludeeTimeStat(long long t0, long long t1, long long t2, long long t3, long long t4) = 0;
+
+	virtual void SetOccluderTimeStat(long long t0, long long t1, long long t2) = 0;
 	/*!
 	 * \brief Returns the implementation (CPU instruction set) version of this object.
 	 */
@@ -514,7 +533,11 @@ public:
 	 *        as compactly in memory as possible. Note that for this function, the
 	 *        w-component is assumed to be 1.0.
 	 */
-	static void TransformVertices(const float *mtx, const float *inVtx, float *xfVtx, unsigned int nVtx, const VertexLayout &vtxLayout = VertexLayout(12, 4, 8));
+	static void TransformVector3(const float *mtx, const float *inVtx, float *xfVtx, unsigned int nVtx, const VertexLayout &vtxLayout = VertexLayout(12, 4, 8));
+
+	static void TransformVector4(const float *mtx, const float *inVtx, float *xfVtx, unsigned int nVtx);
+
+	static void DivW(float *pVtx);
 
 	/*!
 	 * \brief Get used memory alloc/free callbacks.

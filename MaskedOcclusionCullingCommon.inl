@@ -1628,7 +1628,7 @@ public:
     CullingResult TestRect( float xmin, float ymin, float xmax, float ymax, float wmin, float wmax) const override
 	{
 		STATS_ADD(mStats.mOccludees.mNumProcessedRectangles, 1);
-		if (xmin>1 || ymin>1 || xmax<-1 || ymax<-1 || wmax<0)
+		if (wmax<0)
 		{
 			return CullingResult::VIEW_CULLED;
 		}
@@ -2049,6 +2049,33 @@ public:
 	OcclusionCullingStatistics GetStatistics() override
 	{
 		return mStats;
+	}
+
+	void AddOccluderCount(int nTris) override
+	{
+		STATS_ADD(mStats.mOccluders.mNumInputTriangles, nTris);
+	}
+
+	void AddOccludeeCount(int nRect) override
+	{
+		STATS_ADD(mStats.mOccludees.mNumInputRectangles, nRect);
+	}
+
+	void SetOccludeeTimeStat(long long t0, long long t1, long long t2, long long t3, long long t4) override
+	{
+		mStats.mOccludees.test_full_time = t0;
+		mStats.mOccludees.test_frustum_cull_time = t1;
+		mStats.mOccludees.transform_time = t2;
+		mStats.mOccludees.boundingbox_time = t3;
+		mStats.mOccludees.test_time = t4;
+	}
+
+	void SetOccluderTimeStat(long long t0, long long t1, long long t2) override
+	{
+		mStats.mOccluders.rasterize_full_time = t0;
+		mStats.mOccluders.test_frustum_cull_time = t1;
+		mStats.mOccluders.rasterize_time = t2;
+
 	}
 
 };

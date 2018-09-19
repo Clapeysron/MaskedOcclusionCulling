@@ -19,7 +19,14 @@ extern "C" {
 		float *inVtx;
 		int *inTris;
 		int nTris;
-		float *modelToClipMatrix;
+		float *center;
+		float radius;
+	};
+
+	struct objectTestData {
+		float *bounds;
+		float *center;
+		float radius;
 	};
 
 	DLL_API void* mocCreate(Implementation RequestedSIMD);
@@ -40,12 +47,23 @@ extern "C" {
 
 	DLL_API void mocComputePixelDepthBuffer(void* moc, float *depthData, bool flipY);
 
-	DLL_API void mocRenderObjects(void* moc, objectRenderData* data, int nObject, int* resultList, float* PxVMatrix, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask);
+	DLL_API void mocRenderObjects(void* moc, int nObject, float* OccluderInVtx, int* OccluderVtxIndex,
+								  int* OccluderInTris, int* OccluderNTris, int* OccluderTrisIndex, float* OccluderCenter,
+								  float* OccluderRadius, int* resultList, float* PVMatrix, float* frustum,
+								  BackfaceWinding bfWinding, ClipPlanes clipPlaneMask);
 
-	DLL_API void mocTestObjects(void* moc, objectRenderData* data, int nObject, int* resultList, BackfaceWinding bfWinding, ClipPlanes clipPlaneMask);
+	DLL_API void mocTestObjects(void* moc, int nObject, float* OccludeeBounds, float* OccludeeCenter,
+								float* OccludeeRadius, int* resultList, float* PVMatrix, float* frustum,
+								BackfaceWinding bfWinding, ClipPlanes clipPlaneMask);
 
 	DLL_API void mocTestRects(void* moc, float *data, int nRect, int* resultList);
 
 	DLL_API void mocGetStatistics(void* moc, long long* result);
+
+	bool frustumTest(const float* frustum, const float* center, float radius);
+
+	float mocMin(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8);
+
+	float mocMax(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8);
 
 }
